@@ -8,7 +8,16 @@
 This repository contains the Rinig caption app — a Vite + React project built
 from the original design mockup and the Rinig design system.
 
-## Getting started
+## Live site
+
+The app auto-deploys to **GitHub Pages** on every push to `main`:
+
+**https://dxbzek.github.io/rinig/**
+
+Anyone can open that link in a browser — no install needed. (The deploy is
+handled by `.github/workflows/deploy.yml`; the first run also enables Pages.)
+
+## Getting started (local development)
 
 ```bash
 npm install

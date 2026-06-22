@@ -9,7 +9,7 @@ export function Onboarding({ onDone, accent }) {
 
   const Logo = (
     <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-      <img src="/assets/rinig-mark.svg" alt="" width="34" height="34" style={{ borderRadius:'9px' }}/>
+      <img src={`${import.meta.env.BASE_URL}assets/rinig-mark.svg`} alt="" width="34" height="34" style={{ borderRadius:'9px' }}/>
       <span style={{ fontFamily:'var(--font-display)', fontWeight:800, fontSize:'22px', letterSpacing:'-0.02em', color:'var(--text-strong)' }}>
         Rinig<span style={{ color:'var(--beam-500)' }}>.</span>
       </span>
@@ -21,7 +21,7 @@ export function Onboarding({ onDone, accent }) {
       <div style={screenPad}>
         {Logo}
         <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', gap:'26px' }}>
-          <img src="/assets/illustration-listening.svg" alt="" width="232" />
+          <img src={`${import.meta.env.BASE_URL}assets/illustration-listening.svg`} alt="" width="232" />
           <h1 style={{ fontFamily:'var(--font-display)', fontWeight:800, fontSize:'36px', lineHeight:1.06, letterSpacing:'-0.02em', color:'var(--text-strong)', margin:0 }}>
             Turn the room<br/>into words
           </h1>

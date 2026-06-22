@@ -11,7 +11,7 @@ export function StartScreen({ settings, setSettings, onStart, onOpenSettings, on
 
   const Logo = (
     <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-      <img src="/assets/rinig-mark.svg" alt="" width="32" height="32" style={{ borderRadius:'8px' }}/>
+      <img src={`${import.meta.env.BASE_URL}assets/rinig-mark.svg`} alt="" width="32" height="32" style={{ borderRadius:'8px' }}/>
       <span style={{ fontFamily:'var(--font-display)', fontWeight:800, fontSize:'22px', letterSpacing:'-0.02em', color:'var(--text-strong)' }}>
         Rinig<span style={{ color:'var(--beam-500)' }}>.</span>
       </span>
