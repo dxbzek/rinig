@@ -37,12 +37,6 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     return () => clearInterval(id)
   }, [sr.supported, demoListening, seg])
 
-  // In tap mode with a real engine, start listening as soon as the stage opens.
-  React.useEffect(() => {
-    if (sr.supported && !holdMode) sr.start()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sr.supported, holdMode])
-
   // ── Unify the two sources into what the view renders ────────────────────────
   let listening, historyLines, settled, live, activeSpeaker, translation
   if (sr.supported) {
@@ -83,6 +77,13 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     ? (listening ? 'Listening… start speaking' : 'Tap the mic to start')
     : null
 
+  // Friendly, actionable wording for the common recognition errors.
+  const errMsg =
+    sr.error === 'network' ? "Can't reach the speech service. Chrome's live captions run in Google's cloud — check your internet, or this network may be blocking it."
+    : (sr.error === 'not-allowed' || sr.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
+    : sr.error === 'audio-capture' ? 'No microphone found. Plug one in and tap the mic again.'
+    : sr.error ? `Mic error: ${sr.error}` : null
+
   return (
     <div style={{ position:'absolute', inset:0, background:theme, display:'flex', flexDirection:'column' }}>
       {/* soft amber listening bloom */}
@@ -119,9 +120,9 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
       {/* control bar */}
       <div style={{ position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', padding:'14px 18px 28px',
                     background:'linear-gradient(to top, rgba(0,0,0,0.62), transparent)' }}>
-        {sr.error && (
-          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.06em', color:'var(--danger-500, #e5484d)' }}>
-            Mic error: {sr.error}
+        {errMsg && (
+          <p style={{ margin:0, maxWidth:'34ch', textAlign:'center', fontFamily:'var(--font-sans)', fontSize:'13px', lineHeight:1.4, color:'var(--danger-500, #e5484d)' }}>
+            {errMsg}
           </p>
         )}
         {!sr.supported && (
