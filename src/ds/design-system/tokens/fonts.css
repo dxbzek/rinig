@@ -1,0 +1,17 @@
+/* Rinig webfonts.
+   --------------------------------------------------------------------------
+   Atkinson Hyperlegible — the legibility workhorse. Designed by the Braille
+   Institute specifically for low-vision readers: disambiguated letterforms,
+   open apertures, exaggerated character differences. It IS the brand soul of
+   an accessibility-first captioning product. Carries all UI, body, captions.
+
+   Hanken Grotesk — confident geometric display. Heavy weights, tight tracking.
+   The bold, high-contrast marketing voice.
+
+   Spline Sans Mono — timestamps, counters, latency/technical metadata.
+
+   Loaded from Google Fonts so consumers get them with one stylesheet link.
+   To self-host, replace the @import with @font-face rules pointing at copied
+   binaries. */
+
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Hanken+Grotesk:wght@400;500;600;700;800;900&family=Spline+Sans+Mono:wght@400;500;600&display=swap');

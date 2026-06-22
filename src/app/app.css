@@ -1,0 +1,33 @@
+/* App-level page shell + a few raw-icon helpers the design system doesn't own. */
+html, body { margin: 0; height: 100%; }
+
+body {
+  background: var(--surface-sunken);
+  font-family: var(--font-sans);
+  color: var(--text-strong);
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  body { padding: 0; }
+}
+
+/* Raw stroke icons used outside design-system slots (search field, clear button). */
+.rin-slot svg { width: 22px; height: 22px; display: block; }
+.rin-slot-sm svg { width: 14px; height: 14px; display: block; }
+
+/* Gentle fade as each onboarding tour card mounts. */
+@keyframes rin-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.rin-tour-card { animation: rin-fade 200ms var(--ease-out, ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rin-tour-card { animation: none; }
+}

@@ -1,0 +1,32 @@
+// Saved-transcript detail view.
+import React from 'react'
+import { DS } from '../ds/index.js'
+import Icon from './icons.jsx'
+
+export function TranscriptDetail({ session, onBack, onShare }) {
+  const { AppBar, IconButton, Badge } = DS
+  const I = Icon
+  return (
+    <div style={{ position:'absolute', inset:0, background:'var(--surface-page)', display:'flex', flexDirection:'column' }}>
+      <div style={{ paddingTop:'14px' }}>
+        <AppBar
+          title={session.title}
+          leading={<IconButton aria-label="Back" variant="ghost" onClick={onBack}><I.Back/></IconButton>}
+          trailing={<IconButton aria-label="Share transcript" variant="soft" onClick={onShare}><I.Share/></IconButton>}
+        />
+      </div>
+      <div style={{ padding:'14px 24px 10px', display:'flex', alignItems:'center', gap:'10px' }}>
+        <Badge tone="neutral">{session.meta}</Badge>
+        <span style={{ fontSize:'var(--text-body-sm)', color:'var(--text-muted)' }}>{session.when}</span>
+      </div>
+      <div style={{ flex:1, overflowY:'auto', padding:'8px 24px 28px', display:'flex', flexDirection:'column', gap:'18px' }}>
+        {session.lines.map((l, i) => (
+          <div key={i}>
+            <span style={{ display:'block', fontSize:'var(--text-label)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'var(--text-muted)', marginBottom:'4px' }}>{l.speaker}</span>
+            <p style={{ margin:0, fontSize:'var(--text-body-lg)', lineHeight:1.5, color:'var(--text-strong)' }}>{l.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
