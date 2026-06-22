@@ -42,6 +42,17 @@ device frame:
 - **Transcript detail** — read and share a saved session.
 - **Settings sheet** — text size, language, translation, high contrast, saving.
 
+### Built for everyday use
+
+- **Saves real transcripts** — the Save button stores the captioned conversation
+  on the device; History and the transcript view read your real saved sessions.
+- **Remembers your choices** — text size, language, and contrast persist, and the
+  tutorial only shows on the first visit.
+- **Keeps the screen awake** while captioning (Screen Wake Lock).
+- **Share / copy** a transcript via the native share sheet or clipboard.
+- **Installable** — add it to a phone's home screen and launch it like an app
+  (PWA manifest + icons). Everything is stored locally; no account needed.
+
 ## Live transcription
 
 In **Chrome or Edge**, the live caption stage uses real speech recognition via

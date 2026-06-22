@@ -2,12 +2,13 @@
 import React from 'react'
 import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
-import { RINIG_RECENTS, RINIG_FILTERS } from './captions-data.js'
+import { RINIG_FILTERS } from './captions-data.js'
+import { getSessions } from './store.js'
 
 export function HistorySearch({ onBack, onOpenSession }) {
   const { AppBar, IconButton, ListRow } = DS
   const I = Icon
-  const all = RINIG_RECENTS
+  const all = getSessions()
   const filters = RINIG_FILTERS
   const [q, setQ] = React.useState('')
   const [filter, setFilter] = React.useState('All')

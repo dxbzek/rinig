@@ -7,6 +7,16 @@ export function Onboarding({ onDone, accent }) {
   const [step, setStep] = React.useState('permit') // permit | tour
   const [card, setCard] = React.useState(0)
 
+  // Trigger the real browser microphone prompt, then continue to the tour.
+  // If the user declines, they can still proceed and grant it later.
+  const requestMic = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach(t => t.stop())
+    } catch { /* denied — recognition will prompt again when they start */ }
+    setStep('tour')
+  }
+
   const Logo = (
     <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
       <img src={`${import.meta.env.BASE_URL}assets/rinig-mark.svg`} alt="" width="34" height="34" style={{ borderRadius:'9px' }}/>
@@ -30,7 +40,7 @@ export function Onboarding({ onDone, accent }) {
           </p>
         </div>
         <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
-          <Button variant="primary" size="lg" fullWidth onClick={()=>setStep('tour')}>Allow microphone</Button>
+          <Button variant="primary" size="lg" fullWidth onClick={requestMic}>Allow microphone</Button>
           <p style={{ textAlign:'center', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', margin:0 }}>
             Audio is processed on your device. Nothing is recorded unless you save it.
           </p>

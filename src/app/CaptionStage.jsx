@@ -12,6 +12,8 @@ import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
 import { RINIG_SCRIPT } from './captions-data.js'
 import { useSpeechRecognition } from './useSpeechRecognition.js'
+import { useWakeLock } from './useWakeLock.js'
+import { buildSession } from './store.js'
 
 export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenSettings, onSave }) {
   const { CaptionLine, LanguageToggle, Badge, IconButton, AppBar } = DS
@@ -71,7 +73,18 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const align = vis.align === 'center' ? 'center' : 'flex-start'
   const textAlign = vis.align === 'center' ? 'center' : 'left'
 
+  // Keep the screen awake while actively captioning.
+  useWakeLock(listening)
+
   const toggleDemo = () => setDemoListening(v => !v)
+
+  // Capture what's been transcribed so far into a saved session.
+  const handleSave = () => {
+    const lines = sr.supported
+      ? sr.finals.map(text => ({ text }))
+      : RINIG_SCRIPT.map(s => ({ speaker: s.speaker, text: s.words.join(' ') }))
+    onSave(lines.length ? buildSession(lines, settings.lang) : null)
+  }
 
   const emptyHint = sr.supported
     ? (listening ? 'Listening… start speaking' : 'Tap the mic to start')
@@ -141,7 +154,7 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
             onToggle={sr.supported ? (()=> listening ? sr.stop() : sr.start()) : toggleDemo}
             onHoldStart={sr.supported ? sr.start : (()=>setDemoListening(true))}
             onHoldEnd={sr.supported ? sr.stop : (()=>setDemoListening(false))} />
-          <IconButton aria-label="Save transcript" variant="soft" size="lg" onClick={onSave} style={{ background:'rgba(255,255,255,0.12)', color:'#fff' }}><I.Save/></IconButton>
+          <IconButton aria-label="Save transcript" variant="soft" size="lg" onClick={handleSave} style={{ background:'rgba(255,255,255,0.12)', color:'#fff' }}><I.Save/></IconButton>
         </div>
       </div>
     </div>
