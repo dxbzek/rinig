@@ -60,7 +60,7 @@ export function HistorySearch({ onBack, onOpenSession }) {
       <div style={{ flex:1, overflowY:'auto', padding:'4px 16px 24px' }}>
         {results.length === 0 ? (
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', gap:'18px', padding:'48px 24px' }}>
-            <img src="/assets/illustration-empty.svg" alt="" width="160" />
+            <img src={`${import.meta.env.BASE_URL}assets/illustration-empty.svg`} alt="" width="160" />
             <div>
               <p style={{ margin:'0 0 6px', fontFamily:'var(--font-display)', fontWeight:800, fontSize:'22px', color:'var(--text-strong)' }}>No matches</p>
               <p style={{ margin:0, fontSize:'var(--text-body-md)', color:'var(--text-muted)', maxWidth:'26ch' }}>Try a different word, speaker name, or category.</p>
