@@ -33,8 +33,20 @@ device frame:
 - **Transcript detail** — read and share a saved session.
 - **Settings sheet** — text size, language, translation, high contrast, saving.
 
-> The transcript data is **simulated** (`src/app/captions-data.js`) — this is the
-> UI shell. Wiring up real speech recognition is the next step.
+## Live transcription
+
+In **Chrome or Edge**, the live caption stage uses real speech recognition via
+the browser's [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API)
+— tap the mic, allow microphone access, and your speech is transcribed in
+English (`en-US`) or Tagalog/Filipino (`fil-PH`) per the language toggle.
+
+In other browsers (e.g. Firefox) the stage falls back to a **scripted demo**
+(`src/app/captions-data.js`) that streams canned lines to show the UI.
+
+> ⚠️ **Privacy note:** Chrome's Web Speech API streams microphone audio to
+> Google's servers for transcription — it is **not** on-device, despite the
+> onboarding copy. It's ideal for testing accuracy now; a private/offline build
+> would later swap in an on-device model (e.g. Whisper or Vosk).
 
 ## Project layout
 
