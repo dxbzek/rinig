@@ -55,11 +55,15 @@ export function useSpeechRecognition(lang = 'en') {
       setInterim(live)
     }
 
+    // Errors that won't fix themselves on retry — stop auto-restarting so we
+    // don't spin in a tight loop hammering an unreachable service.
+    const FATAL = new Set(['not-allowed', 'service-not-allowed', 'audio-capture', 'network'])
     rec.onerror = (e) => {
+      const err = e.error
       // "no-speech" / "aborted" are routine; surface the rest.
-      if (e.error && e.error !== 'no-speech' && e.error !== 'aborted') {
-        setError(e.error)
-      }
+      if (!err || err === 'no-speech' || err === 'aborted') return
+      if (FATAL.has(err)) wantOnRef.current = false
+      setError(err)
     }
 
     // The engine stops itself periodically; restart while the user still wants it.

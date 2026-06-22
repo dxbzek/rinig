@@ -2,7 +2,6 @@
 // with transcript detail, a shared settings sheet, and a save toast.
 import React from 'react'
 import { DS } from '../ds/index.js'
-import { AndroidDevice } from './AndroidFrame.jsx'
 import { Onboarding } from './Onboarding.jsx'
 import { StartScreen } from './StartScreen.jsx'
 import { HistorySearch } from './HistorySearch.jsx'
@@ -57,7 +56,7 @@ export function RinigApp() {
   const startLive = (m) => { setMode(m); setScreen('live') }
 
   return (
-    <AndroidDevice dark={screen === 'live'}>
+    <div className="rinig-shell" data-dark={screen === 'live'}>
       <div style={{ position:'relative', width:'100%', height:'100%' }}>
         {screen === 'onboard' && <Onboarding onDone={() => setScreen('start')} accent={vis.accent} />}
 
@@ -96,6 +95,6 @@ export function RinigApp() {
         <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} setSettings={setSettings} />
         {toast && <Toast tone="success" hosted>{toast}</Toast>}
       </div>
-    </AndroidDevice>
+    </div>
   )
 }
