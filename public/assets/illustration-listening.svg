@@ -1,0 +1,14 @@
+<svg width="280" height="200" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rinig listening and turning sound into captions">
+  
+  <circle cx="58" cy="100" r="22" fill="#ffb81c"></circle>
+  <rect x="53" y="89" width="10" height="17" rx="5" fill="#14110c"></rect>
+  <path d="M48 99a10 10 0 0 0 20 0M58 110v6M53 116h10" stroke="#14110c" stroke-width="2.4" stroke-linecap="round"></path>
+  
+  <path d="M92 78a34 34 0 0 1 0 44" stroke="#6b6150" stroke-width="4" stroke-linecap="round"></path>
+  <path d="M104 66a52 52 0 0 1 0 68" stroke="#4a4234" stroke-width="4" stroke-linecap="round"></path>
+  
+  <rect x="130" y="44" width="128" height="112" rx="20" fill="#1c1813" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"></rect>
+  <rect x="148" y="70" width="62" height="11" rx="5.5" fill="#ffffff" opacity="0.42"></rect>
+  <rect x="148" y="92" width="92" height="11" rx="5.5" fill="#ffc94d"></rect>
+  <rect x="148" y="114" width="74" height="11" rx="5.5" fill="#ffffff" opacity="0.42"></rect>
+</svg>

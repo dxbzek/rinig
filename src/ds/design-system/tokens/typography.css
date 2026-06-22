@@ -1,0 +1,53 @@
+/* ==========================================================================
+   RINIG · TYPOGRAPHY TOKENS
+   Big by default. Accessibility minimum body size is 17px, not 16px.
+   ========================================================================== */
+
+:root {
+  /* ---- Families ----------------------------------------------------- */
+  --font-sans:    'Atkinson Hyperlegible', system-ui, -apple-system, sans-serif;
+  --font-display: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono:    'Spline Sans Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* ---- Weights ------------------------------------------------------ */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-display: 800;  /* marketing headlines */
+  --weight-black:   900;
+
+  /* ---- Display scale (Hanken Grotesk, marketing) -------------------- */
+  --text-display-2xl: 5rem;     /* 80 — hero h1 */
+  --text-display-xl:  3.5rem;   /* 56 */
+  --text-display-lg:  2.75rem;  /* 44 — section heads */
+  --text-display-md:  2.25rem;  /* 36 */
+  --text-display-sm:  1.75rem;  /* 28 — card titles */
+
+  /* ---- Title / body scale (Atkinson Hyperlegible) ------------------- */
+  --text-title-lg: 1.5rem;      /* 24 */
+  --text-title-md: 1.25rem;     /* 20 */
+  --text-body-lg:  1.25rem;     /* 20 — preferred reading size */
+  --text-body-md:  1.0625rem;   /* 17 — minimum body */
+  --text-body-sm:  0.9375rem;   /* 15 — captions, footnotes only */
+  --text-label:    0.8125rem;   /* 13 — uppercase eyebrow labels */
+
+  /* ---- Caption scale (the product — deliberately huge) -------------- */
+  --text-caption-xl: 4rem;      /* 64 — primary live caption, phone held near */
+  --text-caption-lg: 3rem;      /* 48 — distance / large-room mode steps down */
+  --text-caption-md: 2.25rem;   /* 36 — secondary / translation line */
+  --text-caption-sm: 1.5rem;    /* 24 — history rows */
+
+  /* ---- Line heights ------------------------------------------------- */
+  --leading-tight:   1.05;  /* display */
+  --leading-snug:    1.18;  /* titles, captions */
+  --leading-normal:  1.45;  /* body */
+  --leading-relaxed: 1.6;   /* long-form */
+
+  /* ---- Letter spacing ----------------------------------------------- */
+  --tracking-tighter: -0.03em; /* big display */
+  --tracking-tight:   -0.015em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-label:   0.12em;  /* uppercase labels */
+}

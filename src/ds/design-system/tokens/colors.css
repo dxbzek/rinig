@@ -1,0 +1,94 @@
+/* ==========================================================================
+   RINIG · COLOR TOKENS
+   Accessibility-first. High contrast is the law, not a preference.
+   Warm-tinted neutrals (human, Filipino warmth) + one bold signal accent.
+   ========================================================================== */
+
+:root {
+  /* ---- Warm ink scale (near-black → warm grays) ---------------------- */
+  --ink-950: #0a0908;   /* caption stage floor — near-true-black */
+  --ink-900: #14110c;   /* primary text, ink pill */
+  --ink-800: #211c15;
+  --ink-700: #342d22;   /* body text */
+  --ink-600: #4a4234;
+  --ink-500: #6b6150;   /* muted text */
+  --ink-400: #908573;   /* disabled / placeholder */
+  --ink-300: #b8ae9c;
+  --ink-200: #d8d0c2;   /* default border */
+  --ink-100: #ece6da;   /* subtle border / sunken surface */
+  --ink-50:  #f3eee4;
+
+  /* ---- Warm paper (page floor → white) ------------------------------ */
+  --paper:   #fbf8f2;   /* off-white page floor, warm */
+  --paper-soft: #f7f3ea;
+  --white:   #ffffff;
+
+  /* ---- Beam · the signature accent (amber-gold) --------------------- */
+  /* Yellow-on-black is the gold standard for low-vision captions; Beam is
+     that signal turned into the brand color. Filipino-sun warm. */
+  --beam-700: #9a5b00;  /* amber text on light surfaces (AA on paper) */
+  --beam-600: #cc7d00;
+  --beam-500: #ffb81c;  /* primary accent fill */
+  --beam-400: #ffc94d;  /* caption-active highlight on dark */
+  --beam-300: #ffdd8a;
+  --beam-200: #ffedc2;
+  --beam-100: #fff6e3;
+
+  /* ---- Semantic hues (used sparingly) ------------------------------- */
+  --success-600: #157a45;
+  --success-500: #1e9e5a;
+  --success-100: #dcf2e6;
+  --danger-600:  #c13338;
+  --danger-500:  #e5484d;
+  --danger-100:  #fbe1e2;
+  --info-600:    #1f5fd6;
+  --info-500:    #2e7bff;
+  --info-100:    #e1ecff;
+
+  /* ======================================================================
+     SEMANTIC ALIASES — reference these in product code, not raw scales.
+     ====================================================================== */
+
+  /* Surfaces — LIGHT: white canvas, ink text, yellow accent.
+     Marketing & app chrome live on white; the caption stage stays dark. */
+  --surface-page:    var(--paper);     /* warm near-white page floor */
+  --surface-card:    var(--white);     /* white card */
+  --surface-sunken:  var(--ink-50);    /* recessed wells / hover */
+  --surface-strong:  var(--ink-100);   /* plates, chips */
+  --surface-inverse: var(--ink-900);   /* dark inversion (bands, chrome) */
+
+  /* Text on white */
+  --text-strong:   var(--ink-900);
+  --text-body:     var(--ink-700);
+  --text-muted:    var(--ink-500);
+  --text-disabled: var(--ink-400);
+  --text-accent:   var(--beam-700);    /* amber text on white (AA) */
+
+  /* Text on accent / on a dark inversion */
+  --text-on-dark:        var(--white);
+  --text-on-dark-muted:  var(--ink-300);
+  --text-on-accent:      var(--ink-900);  /* ink text on yellow */
+  --text-on-action:      var(--ink-900);  /* ink text on yellow primary */
+  --text-on-light:       var(--ink-900);
+
+  /* Borders — ink hairlines on white */
+  --border-subtle:  var(--ink-100);
+  --border-default: var(--ink-200);
+  --border-strong:  var(--ink-900);
+
+  /* Actions — YELLOW is the primary pill, ink is the dark alternate */
+  --action:        var(--beam-500);  /* yellow primary pill, ink text */
+  --action-hover:  var(--beam-400);
+  --action-active: var(--beam-600);
+  --accent:        var(--beam-500);
+  --accent-hover:  var(--beam-400);
+  --accent-active: var(--beam-600);
+  --focus-ring:    var(--beam-500);
+
+  /* ---- Caption stage (the product heart) ---------------------------- */
+  --caption-stage:   var(--ink-950);
+  --caption-text:    var(--white);   /* upcoming / settled words */
+  --caption-active:  var(--beam-400);/* the word being spoken right now */
+  --caption-dim:     rgba(255, 255, 255, 0.42); /* fading older lines */
+  --caption-meta:    rgba(255, 255, 255, 0.62); /* speaker / language label */
+}

@@ -1,0 +1,43 @@
+/* ==========================================================================
+   RINIG · EFFECTS — shadow, focus, blur, motion
+   Restrained. Hairline + one soft warm drop. No murky blue shadows.
+   ========================================================================== */
+
+:root {
+  /* ---- Shadows (warm-tinted, low spread) ---------------------------- */
+  --shadow-xs: 0 1px 2px rgba(20, 17, 12, 0.06);
+  --shadow-sm: 0 2px 8px rgba(20, 17, 12, 0.06);
+  --shadow-md: 0 8px 24px rgba(20, 17, 12, 0.08);
+  --shadow-lg: 0 18px 48px rgba(20, 17, 12, 0.12);
+  /* Amber glow — the "live / listening" atmospheric signal */
+  --glow-beam: 0 0 0 1px rgba(255, 184, 28, 0.35), 0 8px 40px rgba(255, 184, 28, 0.28);
+
+  /* ---- Focus ring — always visible, always Beam --------------------- */
+  --focus-ring-width: 3px;
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--beam-500);
+  --focus-ring-offset: 0 0 0 2px var(--surface-page), 0 0 0 5px var(--beam-500);
+
+  /* ---- Blur (scrims, protection layers behind captions) ------------- */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 28px;
+
+  /* ---- Motion ------------------------------------------------------- */
+  /* Captions appear; they do not bounce. Calm, quick, never decorative. */
+  --ease-out:   cubic-bezier(0.2, 0.7, 0.3, 1); /* @kind other */
+  --ease-in-out:cubic-bezier(0.6, 0, 0.2, 1);   /* @kind other */
+  --dur-fast:   120ms; /* @kind other */
+  --dur-base:   200ms; /* @kind other */
+  --dur-slow:   360ms; /* @kind other */
+  --dur-caption:80ms;  /* @kind other */ /* word-to-word reveal — must feel instant */
+}
+
+/* Honor reduced-motion globally for the accessibility-first brand. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;    /* @kind other */
+    --dur-base: 0ms;    /* @kind other */
+    --dur-slow: 0ms;    /* @kind other */
+    --dur-caption: 0ms; /* @kind other */
+  }
+}
