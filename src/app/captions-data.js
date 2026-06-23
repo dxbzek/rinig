@@ -79,3 +79,20 @@ export const RINIG_RECENTS = [
 
 // Quick-filter chips for the history search screen.
 export const RINIG_FILTERS = ['All', 'Work', 'Family', 'Health', 'School']
+
+// Personal touches — this one's for Dad. 💛
+export const RINIG_GREETING = 'Hello Daddy Billy!'
+
+// Shown when the caption stage opens; one is picked at random each time.
+export const RINIG_PROMPTS = [
+  "What's on your mind, Billy the Kid?",
+  "What's up for today, Best Dad in the world?",
+  'Ready when you are, Daddy Billy!',
+  "Let's hear it, Billy the Kid!",
+  'Talk to me, world’s greatest dad!',
+  "What's the story today, Billy?",
+  'Go ahead, Daddy-o!',
+  "I'm all ears, Billy!",
+  'Speak up, superstar dad!',
+  "What's happening, Billy the Kid?",
+]

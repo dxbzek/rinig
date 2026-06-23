@@ -20,8 +20,12 @@ body {
   height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
+  box-sizing: border-box;
   background: var(--surface-page);
   box-shadow: 0 0 60px rgba(20, 17, 12, 0.12);
+  /* Keep content clear of the iPhone status bar / notch and home indicator. */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   /* Establish a containing block so the design-system's fixed bottom sheet /
      toast stay inside the app column instead of the whole browser window. */
   transform: translateZ(0);
