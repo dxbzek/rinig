@@ -15,6 +15,7 @@ import { useSpeechRecognition } from './useSpeechRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
 import { buildSession, tidyLine } from './store.js'
 import { isIOS } from './platform.js'
+import { playFeedback } from './feedback.js'
 
 export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenSettings, onSave }) {
   const { CaptionLine, LanguageToggle, Badge, IconButton, AppBar } = DS
@@ -88,11 +89,18 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   useWakeLock(listening)
 
   const toggleDemo = () => setDemoListening(v => !v)
+  const snd = { sound: settings.sound !== false }
+
+  // Sound + haptic on the main actions.
+  const startEng = () => { playFeedback('start', snd); supported ? eng.start() : setDemoListening(true) }
+  const stopEng = () => { playFeedback('stop', snd); supported ? eng.stop() : setDemoListening(false) }
+  const toggleEng = () => { listening ? stopEng() : startEng() }
 
   const handleSave = () => {
     const lines = supported
       ? eng.finals.map(text => ({ text }))
       : RINIG_SCRIPT.map(s => ({ speaker: s.speaker, text: s.words.join(' ') }))
+    playFeedback('save', snd)
     onSave(lines.length ? buildSession(lines, settings.lang) : null)
   }
 
@@ -122,10 +130,10 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   }
 
   return (
-    <div style={stageStyle}>
-      {/* soft amber listening glow */}
+    <div className="rin-screen" style={stageStyle}>
+      {/* soft amber listening glow — gently breathes while listening */}
       {listening && (
-        <div aria-hidden="true" style={{ position:'absolute', top:'-12%', left:'50%', transform:'translateX(-50%)', width:'150%', height:'46%',
+        <div aria-hidden="true" className="rin-breathe" style={{ position:'absolute', top:'-12%', left:'50%', transform:'translateX(-50%)', width:'150%', height:'46%',
           background:'radial-gradient(60% 100% at 50% 0%, rgba(255,184,28,0.18), transparent 70%)', pointerEvents:'none' }}/>
       )}
 
@@ -179,9 +187,9 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'28px' }}>
           <IconButton aria-label="Caption settings" variant="soft" size="lg" onClick={onOpenSettings}><I.Gear/></IconButton>
           <StageMic holdMode={holdMode} listening={listening}
-            onToggle={supported ? (()=> listening ? eng.stop() : eng.start()) : toggleDemo}
-            onHoldStart={supported ? eng.start : (()=>setDemoListening(true))}
-            onHoldEnd={supported ? eng.stop : (()=>setDemoListening(false))} />
+            onToggle={supported ? toggleEng : toggleDemo}
+            onHoldStart={startEng}
+            onHoldEnd={stopEng} />
           <IconButton aria-label="Save transcript" variant="soft" size="lg" onClick={handleSave}><I.Save/></IconButton>
         </div>
       </div>
