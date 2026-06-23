@@ -1,13 +1,11 @@
 // On-device speech recognition hook — mirrors the useSpeechRecognition API but
 // runs Whisper locally (see whisper.worker.js). Captures microphone audio,
-// downsamples it to 16 kHz, and periodically asks the worker to transcribe the
-// rolling buffer (interim) and to finalize a phrase on a pause.
-//
-// Trade-off vs. the online engine: a one-time model download (~tens of MB) and
-// higher latency, but it works offline and keeps all audio on the device.
+// downsamples it to 16 kHz, waits for natural pauses, and only transcribes
+// buffers that actually contain speech (so the model doesn't hallucinate words
+// out of silence/noise).
 import React from 'react'
 
-export function useOnDeviceRecognition(lang = 'en') {
+export function useOnDeviceRecognition(lang = 'en', quality = 'standard') {
   const supported =
     typeof Worker !== 'undefined' &&
     typeof navigator !== 'undefined' && !!navigator.mediaDevices &&
@@ -24,14 +22,15 @@ export function useOnDeviceRecognition(lang = 'en') {
   const ctxRef = React.useRef(null)
   const streamRef = React.useRef(null)
   const nodesRef = React.useRef(null)
-  const bufRef = React.useRef([])         // accumulated Float32 frames at the context sample rate
+  const bufRef = React.useRef([])          // accumulated Float32 frames at the context sample rate
   const inRateRef = React.useRef(16000)
   const lastVoiceRef = React.useRef(0)
+  const hadSpeechRef = React.useRef(false)  // did the current buffer contain real speech?
   const busyRef = React.useRef(false)
   const tickRef = React.useRef(null)
   const fileProgRef = React.useRef({})
-  const langRef = React.useRef(lang)
-  langRef.current = lang
+  const langRef = React.useRef(lang); langRef.current = lang
+  const qualityRef = React.useRef(quality); qualityRef.current = quality
 
   const ensureWorker = () => {
     if (workerRef.current) return workerRef.current
@@ -49,8 +48,9 @@ export function useOnDeviceRecognition(lang = 'en') {
       } else if (m.type === 'ready') {
         setStatus('ready'); setProgress(100)
       } else if (m.type === 'result') {
-        if (m.finalize) { if (m.text) setFinals(f => [...f, m.text]); setInterim('') }
-        else { setInterim(m.text) }
+        const text = cleanResult(m.text)
+        if (m.finalize) { if (text) setFinals(f => [...f, text]); setInterim('') }
+        else { setInterim(text) }
         busyRef.current = false
       } else if (m.type === 'error') {
         setError(m.error); busyRef.current = false
@@ -75,12 +75,18 @@ export function useOnDeviceRecognition(lang = 'en') {
   }
 
   const sendTranscribe = (finalize) => {
-    if (busyRef.current || !bufRef.current.length) { if (finalize) bufRef.current = []; return }
+    if (busyRef.current || !bufRef.current.length) { if (finalize) { bufRef.current = []; hadSpeechRef.current = false } return }
+    // Don't transcribe buffers that never contained speech — avoids the model
+    // inventing phrases (e.g. "Thank you.") out of silence or background noise.
+    if (!hadSpeechRef.current) { if (finalize) { bufRef.current = []; } return }
     const audio = downsampleTo16k(bufRef.current, inRateRef.current)
-    if (audio.length < 16000 * 0.4) { if (finalize) bufRef.current = []; return } // ignore < 0.4s
+    if (audio.length < 16000 * 0.5) { if (finalize) { bufRef.current = []; hadSpeechRef.current = false } return } // ignore < 0.5s
     busyRef.current = true
-    ensureWorker().postMessage({ type: 'transcribe', audio, lang: langRef.current, finalize }, [audio.buffer])
-    if (finalize) bufRef.current = []
+    ensureWorker().postMessage(
+      { type: 'transcribe', audio, lang: langRef.current, quality: qualityRef.current, finalize },
+      [audio.buffer],
+    )
+    if (finalize) { bufRef.current = []; hadSpeechRef.current = false }
   }
 
   const teardownAudio = () => {
@@ -90,6 +96,7 @@ export function useOnDeviceRecognition(lang = 'en') {
     try { ctxRef.current && ctxRef.current.close() } catch { /* noop */ }
     try { streamRef.current && streamRef.current.getTracks().forEach(t => t.stop()) } catch { /* noop */ }
     nodesRef.current = null; ctxRef.current = null; streamRef.current = null
+    bufRef.current = []; hadSpeechRef.current = false
   }
 
   const start = async () => {
@@ -97,9 +104,9 @@ export function useOnDeviceRecognition(lang = 'en') {
     setError(null)
     const w = ensureWorker()
     setStatus(s => (s === 'ready' ? 'ready' : 'loading'))
-    w.postMessage({ type: 'load' })
+    w.postMessage({ type: 'load', quality: qualityRef.current })
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
       streamRef.current = stream
       const Ctx = window.AudioContext || window.webkitAudioContext
       const ctx = new Ctx()
@@ -115,7 +122,7 @@ export function useOnDeviceRecognition(lang = 'en') {
         let sum = 0
         for (let i = 0; i < input.length; i++) sum += input[i] * input[i]
         const rms = Math.sqrt(sum / input.length)
-        if (rms > 0.012) lastVoiceRef.current = performance.now()
+        if (rms > 0.018) { lastVoiceRef.current = performance.now(); hadSpeechRef.current = true }
         let total = 0
         for (const f of bufRef.current) total += f.length
         if (total > inRateRef.current * 25) sendTranscribe(true) // cap rolling buffer at ~25s
@@ -130,9 +137,11 @@ export function useOnDeviceRecognition(lang = 'en') {
         let total = 0
         for (const f of bufRef.current) total += f.length
         const secs = total / inRateRef.current
-        if (silentFor > 1100 && secs > 0.6) sendTranscribe(true)      // finalize on a pause
-        else if (secs > 1.2) sendTranscribe(false)                    // live interim while speaking
-      }, 1400)
+        // Finalize a phrase after a clear pause; refresh the interim less often
+        // so Whisper sees more complete speech (better accuracy).
+        if (silentFor > 1300 && secs > 0.7) sendTranscribe(true)
+        else if (secs > 2.0 && hadSpeechRef.current) sendTranscribe(false)
+      }, 1500)
     } catch (err) {
       setError(err && err.name === 'NotAllowedError' ? 'not-allowed' : String(err && err.message || err))
       teardownAudio()
@@ -148,7 +157,6 @@ export function useOnDeviceRecognition(lang = 'en') {
 
   const reset = () => { setFinals([]); setInterim('') }
 
-  // Clean everything up on unmount.
   React.useEffect(() => () => {
     teardownAudio()
     try { workerRef.current && workerRef.current.terminate() } catch { /* noop */ }
@@ -156,4 +164,10 @@ export function useOnDeviceRecognition(lang = 'en') {
   }, [])
 
   return { supported, listening, finals, interim, status, progress, error, start, stop, reset }
+}
+
+// Whisper sometimes emits bracketed non-speech tags like "[BLANK_AUDIO]" or
+// "(music)"; drop those so they don't show up as captions.
+function cleanResult(text) {
+  return (text || '').replace(/[\[(][^\])]*[\])]/g, '').replace(/\s+/g, ' ').trim()
 }

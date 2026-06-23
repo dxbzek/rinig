@@ -1,8 +1,8 @@
-// Live caption stage.
+// Live caption stage — light "white & yellow" theme.
 //
 // Captions come from real speech recognition (Web Speech API online, or the
-// optional on-device engine). Otherwise the stage falls back to a scripted
-// demo (RINIG_SCRIPT) that streams word-by-word.
+// optional on-device Whisper engine). Otherwise the stage falls back to a
+// scripted demo (RINIG_SCRIPT) that streams word-by-word.
 //
 // mode 'tap'  = continuous listening (tap mic to pause/resume).
 // mode 'hold' = caption only while the mic is held.
@@ -22,7 +22,7 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
 
   // Pick the speech engine. Both hooks are inert until start() is called.
   const online = useSpeechRecognition(settings.lang)
-  const ondevice = useOnDeviceRecognition(settings.lang)
+  const ondevice = useOnDeviceRecognition(settings.lang, settings.quality)
   const onDeviceMode = settings.engine === 'ondevice'
   const eng = onDeviceMode ? ondevice : online
   const supported = eng.supported
@@ -32,7 +32,7 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const [seg, setSeg] = React.useState(0)
   const [nWords, setNWords] = React.useState(2)
   const scrollRef = React.useRef(null)
-  const stickRef = React.useRef(true) // is the view pinned to the latest line?
+  const stickRef = React.useRef(true)
 
   React.useEffect(() => {
     if (supported || !demoListening) return
@@ -50,12 +50,11 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   let listening, finalizedLines, settled, live, activeSpeaker, translation
   if (supported) {
     listening = eng.listening
-    // The full session scrolls back; finalized lines are tidied for reading.
     finalizedLines = eng.finals.map(text => ({ text: tidyLine(text) }))
     settled = ''
     live = eng.interim
-    activeSpeaker = undefined           // real STT has no speaker diarization yet
-    translation = undefined             // no live translation yet
+    activeSpeaker = undefined
+    translation = undefined
   } else {
     listening = demoListening
     const cur = RINIG_SCRIPT[seg]
@@ -70,8 +69,6 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     translation = settings.translate ? cur.translation : undefined
   }
 
-  // Sticky auto-scroll: follow the latest line, but stop yanking the view down
-  // once the reader has scrolled up to re-read something.
   const onScroll = () => {
     const el = scrollRef.current
     if (!el) return
@@ -82,19 +79,13 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     if (el && stickRef.current) el.scrollTop = el.scrollHeight
   }, [finalizedLines.length, live, seg, nWords])
 
-  const theme = settings.contrast ? '#000'
-    : vis.stageTheme === 'black' ? '#000'
-    : vis.stageTheme === 'graphite' ? '#1a1712'
-    : 'var(--caption-stage)'
   const align = vis.align === 'center' ? 'center' : 'flex-start'
   const textAlign = vis.align === 'center' ? 'center' : 'left'
 
-  // Keep the screen awake while actively captioning.
   useWakeLock(listening)
 
   const toggleDemo = () => setDemoListening(v => !v)
 
-  // Capture what's been transcribed so far into a saved session.
   const handleSave = () => {
     const lines = supported
       ? eng.finals.map(text => ({ text }))
@@ -109,27 +100,38 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
       : 'Tap the mic to start')
     : null
 
-  // Friendly, actionable wording for the common recognition errors.
   const errMsg =
     eng.error === 'network' ? "Can't reach the online speech service. Try “On-device captions” in Settings — it works offline."
     : (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
     : eng.error === 'audio-capture' ? 'No microphone found. Plug one in and tap the mic again.'
     : eng.error ? `Mic error: ${eng.error}` : null
 
+  // Light "white & yellow" stage. Caption text stays dark ink for legibility
+  // (essential for a captioning tool); the live phrase gets a soft yellow
+  // highlight. High-contrast mode just darkens the ink further.
+  const stageStyle = {
+    position: 'absolute', inset: 0, background: 'var(--surface-card)',
+    display: 'flex', flexDirection: 'column',
+    '--caption-text': 'var(--ink-900)',
+    '--caption-dim': settings.contrast ? 'rgba(20,17,12,0.55)' : 'rgba(20,17,12,0.40)',
+    '--caption-active': 'var(--beam-700)',
+    '--caption-meta': 'var(--ink-500)',
+  }
+
   return (
-    <div style={{ position:'absolute', inset:0, background:theme, display:'flex', flexDirection:'column' }}>
-      {/* soft amber listening bloom */}
-      {listening && vis.stageTheme !== 'black' && !settings.contrast && (
+    <div style={stageStyle}>
+      {/* soft amber listening glow */}
+      {listening && (
         <div aria-hidden="true" style={{ position:'absolute', top:'-12%', left:'50%', transform:'translateX(-50%)', width:'150%', height:'46%',
-          background:'radial-gradient(60% 100% at 50% 0%, rgba(255,184,28,0.16), transparent 70%)', pointerEvents:'none' }}/>
+          background:'radial-gradient(60% 100% at 50% 0%, rgba(255,184,28,0.18), transparent 70%)', pointerEvents:'none' }}/>
       )}
 
       <div style={{ paddingTop:'14px', position:'relative', zIndex:2 }}>
-        <AppBar dark
+        <AppBar
           leading={<Badge tone={listening ? 'live' : 'neutral'}>{listening ? 'Captioning' : 'Paused'}</Badge>}
           trailing={<>
-            <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} dark />
-            <IconButton aria-label="End captioning" variant="ghost" onClick={onExit} style={{ color:'#fff' }}><I.Close/></IconButton>
+            <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
+            <IconButton aria-label="End captioning" variant="ghost" onClick={onExit}><I.Close/></IconButton>
           </>} />
       </div>
 
@@ -138,47 +140,49 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
           <CaptionLine key={'h'+i} size="md" state="history" speaker={h.speaker} text={h.text} style={{ textAlign }} />
         ))}
         {(settled || live) ? (
-          <CaptionLine
-            size={settings.size} state="active" speaker={activeSpeaker}
-            text={settled} live={listening ? live : ''} showCursor={listening}
-            translation={translation}
-            style={{ textAlign }}
-          />
+          <div style={{ background: listening ? 'var(--beam-100)' : 'transparent', borderRadius:'16px', padding: '6px 14px', boxShadow: listening ? 'inset 0 0 0 1px var(--beam-200)' : 'none' }}>
+            <CaptionLine
+              size={settings.size} state="active" speaker={activeSpeaker}
+              text={settled} live={listening ? live : ''} showCursor={listening}
+              translation={translation}
+              style={{ textAlign }}
+            />
+          </div>
         ) : emptyHint ? (
-          <p style={{ margin:0, color:'var(--caption-dim, rgba(255,255,255,0.42))', fontFamily:'var(--font-sans)', fontSize:'var(--text-body-lg)' }}>{emptyHint}</p>
+          <p style={{ margin:0, color:'var(--text-muted)', fontFamily:'var(--font-sans)', fontSize:'var(--text-body-lg)' }}>{emptyHint}</p>
         ) : null}
       </div>
 
       {/* control bar */}
       <div style={{ position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', padding:'14px 18px 28px',
-                    background:'linear-gradient(to top, rgba(0,0,0,0.62), transparent)' }}>
+                    borderTop:'1px solid var(--border-subtle)' }}>
         {errMsg && (
-          <p style={{ margin:0, maxWidth:'34ch', textAlign:'center', fontFamily:'var(--font-sans)', fontSize:'13px', lineHeight:1.4, color:'var(--danger-500, #e5484d)' }}>
+          <p style={{ margin:0, maxWidth:'34ch', textAlign:'center', fontFamily:'var(--font-sans)', fontSize:'13px', lineHeight:1.4, color:'var(--danger-600, #c13338)' }}>
             {errMsg}
           </p>
         )}
         {loadingModel && (
-          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.06em', color:'var(--beam-400)' }}>
+          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.06em', color:'var(--text-accent)' }}>
             Loading on-device model {eng.progress || 0}% — first time only
           </p>
         )}
         {!supported && (
-          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)' }}>
+          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)' }}>
             Demo mode — live transcription needs Chrome or Edge
           </p>
         )}
         {holdMode && supported && (
-          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'13px', letterSpacing:'0.08em', textTransform:'uppercase', color: listening ? 'var(--beam-400)' : 'rgba(255,255,255,0.6)' }}>
+          <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'13px', letterSpacing:'0.08em', textTransform:'uppercase', color: listening ? 'var(--text-accent)' : 'var(--text-muted)' }}>
             {listening ? 'Listening — release to pause' : 'Hold the mic to caption'}
           </p>
         )}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'28px' }}>
-          <IconButton aria-label="Caption settings" variant="soft" size="lg" onClick={onOpenSettings} style={{ background:'rgba(255,255,255,0.12)', color:'#fff' }}><I.Gear/></IconButton>
+          <IconButton aria-label="Caption settings" variant="soft" size="lg" onClick={onOpenSettings}><I.Gear/></IconButton>
           <StageMic holdMode={holdMode} listening={listening}
             onToggle={supported ? (()=> listening ? eng.stop() : eng.start()) : toggleDemo}
             onHoldStart={supported ? eng.start : (()=>setDemoListening(true))}
             onHoldEnd={supported ? eng.stop : (()=>setDemoListening(false))} />
-          <IconButton aria-label="Save transcript" variant="soft" size="lg" onClick={handleSave} style={{ background:'rgba(255,255,255,0.12)', color:'#fff' }}><I.Save/></IconButton>
+          <IconButton aria-label="Save transcript" variant="soft" size="lg" onClick={handleSave}><I.Save/></IconButton>
         </div>
       </div>
     </div>
