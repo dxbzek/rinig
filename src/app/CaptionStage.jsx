@@ -12,7 +12,6 @@ import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
 import { RINIG_SCRIPT, RINIG_PROMPTS } from './captions-data.js'
 import { useSpeechRecognition } from './useSpeechRecognition.js'
-import { useOnDeviceRecognition } from './useOnDeviceRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
 import { buildSession, tidyLine } from './store.js'
 import { isIOS } from './platform.js'
@@ -22,14 +21,11 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const I = Icon
   const holdMode = mode === 'hold'
 
-  // iPhones can't use the real-time Web Speech engine (it needs Dictation, which
-  // many iPhones don't expose), so they run a tiny on-device model instead.
-  // Everything else uses the fast real-time engine. Both hooks stay inert until
-  // start() is called.
-  const online = useSpeechRecognition(settings.lang)
-  const ondevice = useOnDeviceRecognition(settings.lang)
-  const onDeviceMode = isIOS()
-  const eng = onDeviceMode ? ondevice : online
+  // One engine everywhere: real-time Web Speech. It needs no model download, so
+  // there's nothing to run out of memory — works great on Android. (On iPhone it
+  // additionally needs Dictation enabled; if that's unavailable the stage shows
+  // a clear message rather than crashing.)
+  const eng = useSpeechRecognition(settings.lang)
   const supported = eng.supported
 
   // ── Demo fallback (only runs where the browser has no speech support) ───────
@@ -100,15 +96,15 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     onSave(lines.length ? buildSession(lines, settings.lang) : null)
   }
 
-  const loadingModel = onDeviceMode && eng.status === 'loading'
   const emptyHint = supported
-    ? (loadingModel ? `Preparing captions… ${eng.progress || 0}% (first time only)`
-      : listening ? 'Listening… start speaking'
-      : promptRef.current)
+    ? (listening ? 'Listening… start speaking' : promptRef.current)
     : null
 
   const errMsg =
-    (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
+    (eng.error === 'not-allowed' || eng.error === 'service-not-allowed')
+      ? (isIOS()
+          ? 'Live captions need iPhone Dictation (Settings → search “Dictation”). If your iPhone has no Dictation option, use an Android phone — captions work there with no setup.'
+          : 'Microphone is blocked. Allow mic access for this site, then tap the mic again.')
     : eng.error === 'network' ? 'Can’t reach captions — check your internet connection.'
     : eng.error === 'audio-capture' ? 'No microphone found.'
     : eng.error ? `Mic error: ${eng.error}` : null
