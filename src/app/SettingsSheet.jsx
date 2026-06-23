@@ -8,7 +8,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
   const SIZE_TO_IDX = { md: 1, lg: 2, xl: 3 }
   const IDX_TO_SIZE = { 0: 'md', 1: 'md', 2: 'lg', 3: 'xl' }
   const sizeIdx = SIZE_TO_IDX[settings.size] ?? 2
-  const onDevice = settings.engine === 'ondevice'
 
   const clearAll = () => {
     if (typeof confirm === 'function' && !confirm('Delete all saved transcripts? This cannot be undone.')) return
@@ -28,20 +27,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
           <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
         </div>
 
-        {/* Captioning mode */}
-        <div style={{ padding:'4px 8px 10px' }}>
-          <p style={ssLabel}>Captions</p>
-          <div style={{ display:'flex', gap:'8px' }}>
-            <EngineChip on={!onDevice} label="Real-time" sub="Fast · needs internet" onClick={()=>setSettings(s=>({ ...s, engine:'online' }))} />
-            <EngineChip on={onDevice} label="Offline" sub="Private · higher accuracy · slower" onClick={()=>setSettings(s=>({ ...s, engine:'ondevice' }))} />
-          </div>
-          <p style={{ margin:'10px 2px 0', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', lineHeight:1.4 }}>
-            {onDevice
-              ? 'Runs on your device with the higher-accuracy model — nothing is sent away and it works offline, but captions appear a little after you speak (not real-time). Downloads a model the first time.'
-              : 'Words appear as you speak. Needs a connection.'}
-          </p>
-        </div>
-
         <ListRow title="Show translation line" meta="Display the second language below"
           trailing={<Switch checked={settings.translate} onChange={e=>setSettings(s=>({ ...s, translate:e.target.checked }))} />} />
         <ListRow title="High-contrast captions" meta="Maximum legibility on the stage"
@@ -52,22 +37,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
         <button onClick={clearAll} style={clearBtn}>Clear saved transcripts</button>
       </div>
     </Sheet>
-  )
-}
-
-// White-and-yellow selectable chip: selected = Beam yellow with ink text.
-function EngineChip({ on, label, sub, onClick }) {
-  return (
-    <button onClick={onClick} aria-pressed={on} style={{
-      flex:1, appearance:'none', cursor:'pointer', textAlign:'left', padding:'12px 14px', borderRadius:'14px',
-      border: on ? '2px solid var(--beam-500)' : '1px solid var(--border-default)',
-      background: on ? 'var(--beam-100)' : 'var(--surface-card)',
-      color: 'var(--text-strong)',
-      fontFamily:'var(--font-sans)',
-    }}>
-      <span style={{ display:'block', fontWeight:800, fontSize:'var(--text-body-md)' }}>{label}</span>
-      <span style={{ display:'block', fontSize:'var(--text-body-sm)', color:'var(--text-muted)' }}>{sub}</span>
-    </button>
   )
 }
 
