@@ -10,6 +10,7 @@ import React from 'react'
 import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
 import { RINIG_SCRIPT } from './captions-data.js'
+import { useSpeechRecognition } from './useSpeechRecognition.js'
 import { useOnDeviceRecognition } from './useOnDeviceRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
 import { buildSession, tidyLine } from './store.js'
@@ -19,9 +20,12 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const I = Icon
   const holdMode = mode === 'hold'
 
-  // One mode for everyone: on-device Whisper at the highest quality — private,
-  // offline, and the most accurate (especially for Tagalog). Inert until start().
-  const eng = useOnDeviceRecognition(settings.lang, 'high')
+  // Two engines: real-time online (fast, default) and on-device Whisper, always
+  // at higher accuracy (private/offline, but not real-time). Both inert until start().
+  const online = useSpeechRecognition(settings.lang)
+  const ondevice = useOnDeviceRecognition(settings.lang, 'high')
+  const onDeviceMode = settings.engine === 'ondevice'
+  const eng = onDeviceMode ? ondevice : online
   const supported = eng.supported
 
   // ── Demo fallback (only runs when the chosen engine is unavailable) ──────────
@@ -90,15 +94,16 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     onSave(lines.length ? buildSession(lines, settings.lang) : null)
   }
 
-  const loadingModel = eng.status === 'loading'
+  const loadingModel = onDeviceMode && eng.status === 'loading'
   const emptyHint = supported
-    ? (loadingModel ? `Preparing captions… ${eng.progress || 0}%`
-      : listening ? 'Listening… start speaking'
+    ? (loadingModel ? `Preparing offline captions… ${eng.progress || 0}%`
+      : listening ? (onDeviceMode ? 'Listening… (offline can lag a little)' : 'Listening… start speaking')
       : 'Tap the mic to start')
     : null
 
   const errMsg =
-    (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
+    eng.error === 'network' ? "Can't reach the online captions. Check your connection, or switch to Offline mode in Settings."
+    : (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
     : eng.error === 'audio-capture' ? 'No microphone found. Plug one in and tap the mic again.'
     : eng.error ? `Mic error: ${eng.error}` : null
 
