@@ -6,13 +6,24 @@ import Icon from './icons.jsx'
 export function TranscriptDetail({ session, onBack, onShare }) {
   const { AppBar, IconButton, Badge } = DS
   const I = Icon
+
+  // Share via the native share sheet where available, otherwise copy to clipboard.
+  const handleShare = async () => {
+    const text = session.lines.map(l => (l.speaker ? l.speaker + ': ' : '') + l.text).join('\n')
+    try {
+      if (navigator.share) { await navigator.share({ title: session.title, text }); return }
+      await navigator.clipboard.writeText(text)
+      onShare('Copied to clipboard')
+    } catch { /* user cancelled the share, or clipboard blocked */ }
+  }
+
   return (
     <div style={{ position:'absolute', inset:0, background:'var(--surface-page)', display:'flex', flexDirection:'column' }}>
       <div style={{ paddingTop:'14px' }}>
         <AppBar
           title={session.title}
           leading={<IconButton aria-label="Back" variant="ghost" onClick={onBack}><I.Back/></IconButton>}
-          trailing={<IconButton aria-label="Share transcript" variant="soft" onClick={onShare}><I.Share/></IconButton>}
+          trailing={<IconButton aria-label="Share transcript" variant="soft" onClick={handleShare}><I.Share/></IconButton>}
         />
       </div>
       <div style={{ padding:'14px 24px 10px', display:'flex', alignItems:'center', gap:'10px' }}>
@@ -22,7 +33,7 @@ export function TranscriptDetail({ session, onBack, onShare }) {
       <div style={{ flex:1, overflowY:'auto', padding:'8px 24px 28px', display:'flex', flexDirection:'column', gap:'18px' }}>
         {session.lines.map((l, i) => (
           <div key={i}>
-            <span style={{ display:'block', fontSize:'var(--text-label)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'var(--text-muted)', marginBottom:'4px' }}>{l.speaker}</span>
+            {l.speaker && <span style={{ display:'block', fontSize:'var(--text-label)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'var(--text-muted)', marginBottom:'4px' }}>{l.speaker}</span>}
             <p style={{ margin:0, fontSize:'var(--text-body-lg)', lineHeight:1.5, color:'var(--text-strong)' }}>{l.text}</p>
           </div>
         ))}

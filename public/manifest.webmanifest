@@ -1,0 +1,15 @@
+{
+  "name": "Rinig — live captions",
+  "short_name": "Rinig",
+  "description": "Real-time English and Tagalog captions for Deaf and hard-of-hearing users.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf8f2",
+  "theme_color": "#fbf8f2",
+  "icons": [
+    { "src": "assets/rinig-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

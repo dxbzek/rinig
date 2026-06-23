@@ -2,12 +2,12 @@
 import React from 'react'
 import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
-import { RINIG_RECENTS } from './captions-data.js'
+import { getSessions } from './store.js'
 
 export function StartScreen({ settings, setSettings, onStart, onOpenSettings, onOpenHistory, onOpenSession }) {
   const { LanguageToggle, AppBar, ListRow, IconButton } = DS
   const I = Icon
-  const recents = RINIG_RECENTS.slice(0, 3)
+  const recents = getSessions().slice(0, 3)
 
   const Logo = (
     <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>

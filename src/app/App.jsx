@@ -8,6 +8,7 @@ import { HistorySearch } from './HistorySearch.jsx'
 import { CaptionStage } from './CaptionStage.jsx'
 import { TranscriptDetail } from './TranscriptDetail.jsx'
 import { SettingsSheet } from './SettingsSheet.jsx'
+import { usePersistentState, addSession } from './store.js'
 
 // Default caption presentation. (In the design mockup these were live-editable
 // "tweaks"; here they are the app's shipped defaults.)
@@ -23,26 +24,33 @@ const DEFAULTS = {
 export function RinigApp() {
   const { Toast } = DS
 
-  const [screen, setScreen] = React.useState('onboard') // onboard | start | history | live | detail
+  // Skip onboarding on return visits (persisted once the tour is finished).
+  const [onboarded, setOnboarded] = usePersistentState('rinig.onboarded.v1', false)
+  const [screen, setScreen] = React.useState(onboarded ? 'start' : 'onboard') // onboard | start | history | live | detail
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const [session, setSession] = React.useState(null)
   const [mode, setMode] = React.useState('tap') // tap | hold
-  const [lang, setLang] = React.useState('en')
   const [toast, setToast] = React.useState(null)
 
-  // settings derived from defaults + local language; writable for in-app controls.
-  const [override, setOverride] = React.useState({})
-  const settings = {
-    lang,
-    size: override.size ?? DEFAULTS.captionSize,
-    translate: override.translate ?? DEFAULTS.translation,
-    contrast: override.contrast ?? DEFAULTS.highContrast,
-    save: override.save ?? true,
-  }
+  // Caption preferences persist on the device so they're remembered next time.
+  const [lang, setLang] = usePersistentState('rinig.lang.v1', 'en')
+  const [prefs, setPrefs] = usePersistentState('rinig.prefs.v1', {
+    size: DEFAULTS.captionSize,
+    translate: DEFAULTS.translation,
+    contrast: DEFAULTS.highContrast,
+    save: true,
+  })
+
+  const settings = { lang, ...prefs }
   const setSettings = (updater) => {
     const next = typeof updater === 'function' ? updater(settings) : updater
     if (next.lang !== undefined) setLang(next.lang)
-    setOverride(o => ({ ...o, size: next.size, translate: next.translate, contrast: next.contrast, save: next.save }))
+    setPrefs(p => ({
+      size: next.size ?? p.size,
+      translate: next.translate ?? p.translate,
+      contrast: next.contrast ?? p.contrast,
+      save: next.save ?? p.save,
+    }))
   }
 
   const vis = { align: DEFAULTS.align, stageTheme: DEFAULTS.stageTheme, showSpeaker: DEFAULTS.speakerLabels, accent: 'var(--beam-500)' }
@@ -54,11 +62,20 @@ export function RinigApp() {
     toastTimer.current = setTimeout(() => setToast(null), 2400)
   }
   const startLive = (m) => { setMode(m); setScreen('live') }
+  const finishOnboarding = () => { setOnboarded(true); setScreen('start') }
+
+  // Persist a captured transcript and confirm. `s` is null when there's nothing
+  // worth saving yet.
+  const handleSave = (s) => {
+    if (!s || !settings.save) { showToast(s ? 'Saving is turned off' : 'Nothing to save yet'); return }
+    addSession(s)
+    showToast('Transcript saved')
+  }
 
   return (
     <div className="rinig-shell" data-dark={screen === 'live'}>
       <div style={{ position:'relative', width:'100%', height:'100%' }}>
-        {screen === 'onboard' && <Onboarding onDone={() => setScreen('start')} accent={vis.accent} />}
+        {screen === 'onboard' && <Onboarding onDone={finishOnboarding} accent={vis.accent} />}
 
         {screen === 'start' && (
           <StartScreen
@@ -82,14 +99,14 @@ export function RinigApp() {
             settings={settings} setSettings={setSettings} vis={vis} mode={mode}
             onExit={() => setScreen('start')}
             onOpenSettings={() => setSettingsOpen(true)}
-            onSave={() => showToast('Transcript saved')}
+            onSave={handleSave}
           />
         )}
 
         {screen === 'detail' && session && (
           <TranscriptDetail session={session}
             onBack={() => setScreen('start')}
-            onShare={() => showToast('Share link copied')} />
+            onShare={(msg) => showToast(msg)} />
         )}
 
         <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} setSettings={setSettings} />
