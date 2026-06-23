@@ -8,6 +8,14 @@ import './ds/index.js'
 import './app/app.css'
 import { RinigApp } from './app/App.jsx'
 
+// Ask the browser to keep our storage (so the downloaded offline-captions model
+// isn't evicted and re-downloaded every visit). No-op where unsupported.
+if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.persist) {
+  navigator.storage.persisted()
+    .then((already) => { if (!already) return navigator.storage.persist() })
+    .catch(() => { /* ignore */ })
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <RinigApp />
