@@ -9,7 +9,7 @@
 import React from 'react'
 import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
-import { RINIG_SCRIPT } from './captions-data.js'
+import { RINIG_SCRIPT, RINIG_PROMPTS } from './captions-data.js'
 import { useSpeechRecognition } from './useSpeechRecognition.js'
 import { useOnDeviceRecognition } from './useOnDeviceRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
@@ -34,6 +34,8 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const [nWords, setNWords] = React.useState(2)
   const scrollRef = React.useRef(null)
   const stickRef = React.useRef(true)
+  // A friendly, personalized prompt picked once when the stage opens.
+  const promptRef = React.useRef(RINIG_PROMPTS[Math.floor(Math.random() * RINIG_PROMPTS.length)])
 
   React.useEffect(() => {
     if (supported || !demoListening) return
@@ -98,14 +100,18 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const emptyHint = supported
     ? (loadingModel ? `Preparing offline captions… ${eng.progress || 0}%`
       : listening ? (onDeviceMode ? 'Listening… (offline can lag a little)' : 'Listening… start speaking')
-      : 'Tap the mic to start')
+      : promptRef.current)
     : null
 
   const errMsg =
-    eng.error === 'network' ? "Can't reach the online captions. Check your connection, or switch to Offline mode in Settings."
-    : (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
-    : eng.error === 'audio-capture' ? 'No microphone found. Plug one in and tap the mic again.'
+    eng.error === 'service-not-allowed' ? "Real-time captions aren’t available in this browser (common on iPhone)."
+    : eng.error === 'not-allowed' ? "Microphone permission is needed. If you already allowed it, try Offline captions."
+    : eng.error === 'network' ? "Can’t reach real-time captions — check your connection."
+    : eng.error === 'audio-capture' ? 'No microphone found.'
     : eng.error ? `Mic error: ${eng.error}` : null
+  // Offer a one-tap escape to the reliable on-device engine when the online one
+  // fails (especially on iPhone, where real-time web speech is flaky).
+  const showOfflineSwitch = !onDeviceMode && !!eng.error && eng.error !== 'audio-capture'
 
   // Light "white & yellow" stage. Caption text stays dark ink for legibility
   // (essential for a captioning tool); the live phrase gets a soft yellow
@@ -158,9 +164,16 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
       <div style={{ position:'relative', zIndex:2, display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', padding:'14px 18px 28px',
                     borderTop:'1px solid var(--border-subtle)' }}>
         {errMsg && (
-          <p style={{ margin:0, maxWidth:'34ch', textAlign:'center', fontFamily:'var(--font-sans)', fontSize:'13px', lineHeight:1.4, color:'var(--danger-600, #c13338)' }}>
-            {errMsg}
-          </p>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'10px' }}>
+            <p style={{ margin:0, maxWidth:'34ch', textAlign:'center', fontFamily:'var(--font-sans)', fontSize:'13px', lineHeight:1.4, color:'var(--danger-600, #c13338)' }}>
+              {errMsg}
+            </p>
+            {showOfflineSwitch && (
+              <button onClick={()=>setSettings(s=>({ ...s, engine:'ondevice' }))} style={offlineBtn}>
+                Switch to Offline captions
+              </button>
+            )}
+          </div>
         )}
         {loadingModel && (
           <p style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:'12px', letterSpacing:'0.06em', color:'var(--text-accent)' }}>
@@ -189,6 +202,8 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     </div>
   )
 }
+
+const offlineBtn = { appearance:'none', border:'none', cursor:'pointer', padding:'10px 18px', borderRadius:'999px', background:'var(--beam-500)', color:'var(--ink-900)', fontFamily:'var(--font-sans)', fontWeight:800, fontSize:'var(--text-body-sm)' }
 
 // Stage mic: tap-toggle in continuous mode, press-and-hold in hold mode.
 function StageMic({ holdMode, listening, onToggle, onHoldStart, onHoldEnd }) {

@@ -3,6 +3,7 @@ import React from 'react'
 import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
 import { getSessions } from './store.js'
+import { RINIG_GREETING } from './captions-data.js'
 
 export function StartScreen({ settings, setSettings, onStart, onOpenSettings, onOpenHistory, onOpenSession }) {
   const { LanguageToggle, AppBar, ListRow, IconButton } = DS
@@ -31,7 +32,7 @@ export function StartScreen({ settings, setSettings, onStart, onOpenSettings, on
       {/* hero action */}
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'20px', padding:'18px 20px 22px' }}>
         <p style={{ margin:0, textAlign:'center', fontFamily:'var(--font-display)', fontWeight:800, fontSize:'30px', lineHeight:1.1, letterSpacing:'-0.02em', color:'var(--text-strong)' }}>
-          Turn the room<br/>into words
+          {RINIG_GREETING}
         </p>
         <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
         <HoldMic listening={false} onTap={()=>onStart('tap')} onHoldStart={()=>onStart('hold')} idleLabel="Tap to start · hold to catch a moment" />
