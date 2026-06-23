@@ -39,8 +39,6 @@ export function RinigApp() {
     translate: DEFAULTS.translation,
     contrast: DEFAULTS.highContrast,
     save: true,
-    engine: 'online', // 'online' (Web Speech) | 'ondevice' (Whisper)
-    quality: 'standard', // on-device model: 'standard' (base) | 'high' (small)
   })
   const [, forceRefresh] = React.useReducer(x => x + 1, 0)
 
@@ -53,8 +51,6 @@ export function RinigApp() {
       translate: next.translate ?? p.translate,
       contrast: next.contrast ?? p.contrast,
       save: next.save ?? p.save,
-      engine: next.engine ?? p.engine,
-      quality: next.quality ?? p.quality,
     }))
   }
 

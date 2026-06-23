@@ -55,25 +55,19 @@ device frame:
 
 ## Live transcription
 
-Two engines, switchable in **Settings → Captioning engine**:
+Rinig uses **one** captioning engine: OpenAI **Whisper** running entirely
+on-device in the browser via
+[Transformers.js](https://huggingface.co/docs/transformers.js) (WebGPU where
+available, otherwise WASM). It's **private and offline** — no audio leaves the
+device — and runs at the higher-accuracy model for the best results, especially
+for Tagalog. The model downloads once on first use, then is cached.
 
-- **Online (default)** — the browser's
-  [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API).
-  Fast and zero-download, but needs a connection and (in Chrome) streams audio
-  to Google's servers. Works in Chrome/Edge.
-- **On-device** — OpenAI **Whisper** running locally in the browser via
-  [Transformers.js](https://huggingface.co/docs/transformers.js) (WebGPU where
-  available, otherwise WASM). **Private and offline** — no audio leaves the
-  device. Downloads the model once on first use, then caches it. Higher latency
-  than the online engine; the heavy model code is lazy-loaded only when this
-  engine is selected.
+Language follows the toggle: English or Tagalog/Filipino. Where the browser
+can't run it, the stage falls back to a **scripted demo**
+(`src/app/captions-data.js`).
 
-Language follows the toggle: English (`en-US` / `english`) or Tagalog/Filipino
-(`fil-PH` / `tagalog`). Where neither engine is available the stage falls back
-to a **scripted demo** (`src/app/captions-data.js`).
-
-> The on-device engine is new and benefits from real-device testing — accuracy
-> and latency depend on the phone and whether WebGPU is available.
+> Accuracy and latency depend on the device and whether WebGPU is available.
+> The first session downloads the model, so it needs a connection that once.
 
 ## Project layout
 
