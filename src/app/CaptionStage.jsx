@@ -14,6 +14,7 @@ import { useSpeechRecognition } from './useSpeechRecognition.js'
 import { useOnDeviceRecognition } from './useOnDeviceRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
 import { buildSession, tidyLine } from './store.js'
+import { isIOS } from './platform.js'
 
 export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenSettings, onSave }) {
   const { CaptionLine, LanguageToggle, Badge, IconButton, AppBar } = DS
@@ -110,9 +111,9 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     : eng.error === 'network' ? "Can’t reach real-time captions — check your connection."
     : eng.error === 'audio-capture' ? 'No microphone found.'
     : eng.error ? `Mic error: ${eng.error}` : null
-  // Offer a one-tap escape to the reliable on-device engine when the online one
-  // fails (especially on iPhone, where real-time web speech is flaky).
-  const showOfflineSwitch = !onDeviceMode && !!eng.error && eng.error !== 'audio-capture'
+  // Offer a one-tap escape to the on-device engine when the online one fails —
+  // but never on iPhone, where the offline model crashes the browser.
+  const showOfflineSwitch = !onDeviceMode && !!eng.error && eng.error !== 'audio-capture' && !isIOS()
 
   // Light "white & yellow" stage. Caption text stays dark ink for legibility
   // (essential for a captioning tool); the live phrase gets a soft yellow

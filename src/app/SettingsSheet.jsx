@@ -3,7 +3,7 @@ import React from 'react'
 import { DS } from '../ds/index.js'
 import { clearSessions } from './store.js'
 
-export function SettingsSheet({ open, onClose, settings, setSettings, onCleared }) {
+export function SettingsSheet({ open, onClose, settings, setSettings, onCleared, offlineUnavailable }) {
   const { Sheet, ListRow, Switch, TextSizeStepper, LanguageToggle } = DS
   const SIZE_TO_IDX = { md: 1, lg: 2, xl: 3 }
   const IDX_TO_SIZE = { 0: 'md', 1: 'md', 2: 'lg', 3: 'xl' }
@@ -33,10 +33,14 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
           <p style={ssLabel}>Captions</p>
           <div style={{ display:'flex', gap:'8px' }}>
             <EngineChip on={!onDevice} label="Real-time" sub="Fast · needs internet" onClick={()=>setSettings(s=>({ ...s, engine:'online' }))} />
-            <EngineChip on={onDevice} label="Offline" sub="Private · higher accuracy · slower" onClick={()=>setSettings(s=>({ ...s, engine:'ondevice' }))} />
+            <EngineChip on={onDevice} disabled={offlineUnavailable} label="Offline"
+              sub={offlineUnavailable ? 'Not available on iPhone' : 'Private · higher accuracy · slower'}
+              onClick={()=>{ if (!offlineUnavailable) setSettings(s=>({ ...s, engine:'ondevice' })) }} />
           </div>
           <p style={{ margin:'10px 2px 0', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', lineHeight:1.4 }}>
-            {onDevice
+            {offlineUnavailable
+              ? 'Offline mode isn’t available on iPhone — it uses too much memory and crashes Safari. Real-time works great here.'
+              : onDevice
               ? 'Runs on your device with the higher-accuracy model — nothing is sent away and it works offline, but captions appear a little after you speak (not real-time). Downloads a model the first time.'
               : 'Words appear as you speak. Needs a connection.'}
           </p>
@@ -56,13 +60,13 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
 }
 
 // White-and-yellow selectable chip: selected = Beam yellow with ink text.
-function EngineChip({ on, label, sub, onClick }) {
+function EngineChip({ on, label, sub, onClick, disabled }) {
   return (
-    <button onClick={onClick} aria-pressed={on} style={{
-      flex:1, appearance:'none', cursor:'pointer', textAlign:'left', padding:'12px 14px', borderRadius:'14px',
+    <button onClick={onClick} aria-pressed={on} aria-disabled={disabled} disabled={disabled} style={{
+      flex:1, appearance:'none', cursor: disabled ? 'not-allowed' : 'pointer', textAlign:'left', padding:'12px 14px', borderRadius:'14px',
       border: on ? '2px solid var(--beam-500)' : '1px solid var(--border-default)',
       background: on ? 'var(--beam-100)' : 'var(--surface-card)',
-      color: 'var(--text-strong)',
+      color: 'var(--text-strong)', opacity: disabled ? 0.5 : 1,
       fontFamily:'var(--font-sans)',
     }}>
       <span style={{ display:'block', fontWeight:800, fontSize:'var(--text-body-md)' }}>{label}</span>

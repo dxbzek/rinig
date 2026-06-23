@@ -9,6 +9,7 @@ import { CaptionStage } from './CaptionStage.jsx'
 import { TranscriptDetail } from './TranscriptDetail.jsx'
 import { SettingsSheet } from './SettingsSheet.jsx'
 import { usePersistentState, addSession, renameSession, deleteSession } from './store.js'
+import { isIOS } from './platform.js'
 
 // Default caption presentation. (In the design mockup these were live-editable
 // "tweaks"; here they are the app's shipped defaults.)
@@ -43,7 +44,10 @@ export function RinigApp() {
   })
   const [, forceRefresh] = React.useReducer(x => x + 1, 0)
 
-  const settings = { lang, ...prefs }
+  // iPhones crash trying to run the on-device model, so force the real-time
+  // engine there regardless of the saved preference.
+  const offlineUnavailable = isIOS()
+  const settings = { lang, ...prefs, engine: offlineUnavailable ? 'online' : prefs.engine }
   const setSettings = (updater) => {
     const next = typeof updater === 'function' ? updater(settings) : updater
     if (next.lang !== undefined) setLang(next.lang)
@@ -115,6 +119,7 @@ export function RinigApp() {
         )}
 
         <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} setSettings={setSettings}
+          offlineUnavailable={offlineUnavailable}
           onCleared={() => { forceRefresh(); showToast('Saved transcripts cleared') }} />
         {toast && <Toast tone="success" hosted>{toast}</Toast>}
       </div>
