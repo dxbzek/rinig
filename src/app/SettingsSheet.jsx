@@ -8,7 +8,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
   const SIZE_TO_IDX = { md: 1, lg: 2, xl: 3 }
   const IDX_TO_SIZE = { 0: 'md', 1: 'md', 2: 'lg', 3: 'xl' }
   const sizeIdx = SIZE_TO_IDX[settings.size] ?? 2
-  const onDevice = settings.engine === 'ondevice'
 
   const clearAll = () => {
     if (typeof confirm === 'function' && !confirm('Delete all saved transcripts? This cannot be undone.')) return
@@ -28,34 +27,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
           <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
         </div>
 
-        {/* Captioning engine */}
-        <div style={{ padding:'4px 8px 10px' }}>
-          <p style={ssLabel}>Captioning engine</p>
-          <div style={{ display:'flex', gap:'8px' }}>
-            <EngineChip on={!onDevice} label="Online" sub="Fast" onClick={()=>setSettings(s=>({ ...s, engine:'online' }))} />
-            <EngineChip on={onDevice} label="On-device" sub="Private · offline" onClick={()=>setSettings(s=>({ ...s, engine:'ondevice' }))} />
-          </div>
-          <p style={{ margin:'10px 2px 0', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', lineHeight:1.4 }}>
-            {onDevice
-              ? 'Runs on your device — no internet needed and nothing is sent away. Downloads a model the first time.'
-              : 'Uses the browser’s online recognition. Fast, but needs a connection.'}
-          </p>
-        </div>
-
-        {/* On-device accuracy / model size */}
-        {onDevice && (
-          <div style={{ padding:'4px 8px 10px' }}>
-            <p style={ssLabel}>Accuracy</p>
-            <div style={{ display:'flex', gap:'8px' }}>
-              <EngineChip on={settings.quality !== 'high'} label="Standard" sub="Faster" onClick={()=>setSettings(s=>({ ...s, quality:'standard' }))} />
-              <EngineChip on={settings.quality === 'high'} label="Higher" sub="Slower · bigger download" onClick={()=>setSettings(s=>({ ...s, quality:'high' }))} />
-            </div>
-            <p style={{ margin:'10px 2px 0', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', lineHeight:1.4 }}>
-              Higher accuracy uses a larger model — better for Tagalog and tricky audio, but it downloads more and runs slower.
-            </p>
-          </div>
-        )}
-
         <ListRow title="Show translation line" meta="Display the second language below"
           trailing={<Switch checked={settings.translate} onChange={e=>setSettings(s=>({ ...s, translate:e.target.checked }))} />} />
         <ListRow title="High-contrast captions" meta="Maximum legibility on the stage"
@@ -66,21 +37,6 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
         <button onClick={clearAll} style={clearBtn}>Clear saved transcripts</button>
       </div>
     </Sheet>
-  )
-}
-
-function EngineChip({ on, label, sub, onClick }) {
-  return (
-    <button onClick={onClick} aria-pressed={on} style={{
-      flex:1, appearance:'none', cursor:'pointer', textAlign:'left', padding:'12px 14px', borderRadius:'14px',
-      border: on ? '2px solid var(--ink-900)' : '1px solid var(--border-default)',
-      background: on ? 'var(--ink-900)' : 'var(--surface-card)',
-      color: on ? '#fff' : 'var(--text-body)',
-      fontFamily:'var(--font-sans)',
-    }}>
-      <span style={{ display:'block', fontWeight:800, fontSize:'var(--text-body-md)' }}>{label}</span>
-      <span style={{ display:'block', fontSize:'var(--text-body-sm)', opacity:0.8 }}>{sub}</span>
-    </button>
   )
 }
 
