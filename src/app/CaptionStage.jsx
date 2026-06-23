@@ -12,6 +12,7 @@ import { DS } from '../ds/index.js'
 import Icon from './icons.jsx'
 import { RINIG_SCRIPT, RINIG_PROMPTS } from './captions-data.js'
 import { useSpeechRecognition } from './useSpeechRecognition.js'
+import { useOnDeviceRecognition } from './useOnDeviceRecognition.js'
 import { useWakeLock } from './useWakeLock.js'
 import { buildSession, tidyLine } from './store.js'
 import { isIOS } from './platform.js'
@@ -21,7 +22,14 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const I = Icon
   const holdMode = mode === 'hold'
 
-  const eng = useSpeechRecognition(settings.lang)
+  // iPhones can't use the real-time Web Speech engine (it needs Dictation, which
+  // many iPhones don't expose), so they run a tiny on-device model instead.
+  // Everything else uses the fast real-time engine. Both hooks stay inert until
+  // start() is called.
+  const online = useSpeechRecognition(settings.lang)
+  const ondevice = useOnDeviceRecognition(settings.lang)
+  const onDeviceMode = isIOS()
+  const eng = onDeviceMode ? ondevice : online
   const supported = eng.supported
 
   // ── Demo fallback (only runs where the browser has no speech support) ───────
@@ -92,16 +100,15 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
     onSave(lines.length ? buildSession(lines, settings.lang) : null)
   }
 
+  const loadingModel = onDeviceMode && eng.status === 'loading'
   const emptyHint = supported
-    ? (listening ? 'Listening… start speaking' : promptRef.current)
+    ? (loadingModel ? `Preparing captions… ${eng.progress || 0}% (first time only)`
+      : listening ? 'Listening… start speaking'
+      : promptRef.current)
     : null
 
-  // On iPhone, the speech service needs Dictation enabled — surface that.
   const errMsg =
-    (eng.error === 'not-allowed' || eng.error === 'service-not-allowed')
-      ? (isIOS()
-          ? 'iPhone needs Dictation on: Settings → General → Keyboard → Enable Dictation. Then allow the mic and tap again.'
-          : 'Microphone is blocked. Allow mic access for this site, then tap the mic again.')
+    (eng.error === 'not-allowed' || eng.error === 'service-not-allowed') ? 'Microphone is blocked. Allow mic access for this site, then tap the mic again.'
     : eng.error === 'network' ? 'Can’t reach captions — check your internet connection.'
     : eng.error === 'audio-capture' ? 'No microphone found.'
     : eng.error ? `Mic error: ${eng.error}` : null
@@ -129,10 +136,12 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
       <div style={{ paddingTop:'14px', position:'relative', zIndex:2 }}>
         <AppBar
           leading={<Badge tone={listening ? 'live' : 'neutral'}>{listening ? 'Captioning' : 'Paused'}</Badge>}
-          trailing={<>
-            <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
-            <IconButton aria-label="End captioning" variant="ghost" onClick={onExit}><I.Close/></IconButton>
-          </>} />
+          trailing={<IconButton aria-label="End captioning" variant="ghost" onClick={onExit}><I.Close/></IconButton>} />
+        {/* Language toggle on its own centered row so it never overlaps/clips on
+            narrow phones. */}
+        <div style={{ display:'flex', justifyContent:'center', padding:'8px 16px 2px' }}>
+          <LanguageToggle value={settings.lang} onChange={(v)=>setSettings(s=>({ ...s, lang:v }))} />
+        </div>
       </div>
 
       <div ref={scrollRef} onScroll={onScroll} style={{ flex:1, overflowY:'auto', padding:'8px 22px', display:'flex', flexDirection:'column', justifyContent:'flex-end', alignItems:align, textAlign, gap:'18px', position:'relative', zIndex:1 }}>
