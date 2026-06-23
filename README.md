@@ -55,22 +55,19 @@ device frame:
 
 ## Live transcription
 
-Two modes, switchable in **Settings → Captions**:
+One engine, everywhere: real-time speech recognition via the browser's
+[Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API).
+Words appear **as you speak**, with **no model download** — so it loads fast and
+runs on every device (Android and iPhone). It needs an internet connection.
 
-- **Real-time (default)** — the browser's
-  [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API).
-  Words appear **as you speak**. Needs a connection (and, in Chrome, sends audio
-  to Google's servers). Chrome/Edge.
-- **Offline** — OpenAI **Whisper** (higher-accuracy model) running on-device via
-  [Transformers.js](https://huggingface.co/docs/transformers.js). **Private and
-  offline** — no audio leaves the device, better for Tagalog — but captions
-  appear shortly *after* you speak (not real-time), and the model downloads once
-  on first use.
+> An on-device Whisper engine was tried, but it crashed phone browsers
+> (out-of-memory) and required a large download, so it was removed in favour of
+> the lightweight real-time engine.
 
-There's a real trade-off: you can have fast/real-time **or** private/offline, not
-both at once in a phone browser. Language follows the toggle (English or
-Tagalog/Filipino); where neither runs, the stage shows a **scripted demo**
-(`src/app/captions-data.js`).
+**iPhone note:** Web Speech needs **Dictation** enabled
+(Settings → General → Keyboard → Enable Dictation). Language follows the toggle
+(English or Tagalog/Filipino); where the browser has no speech support, the
+stage shows a **scripted demo** (`src/app/captions-data.js`).
 
 ## Project layout
 
