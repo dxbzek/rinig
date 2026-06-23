@@ -42,9 +42,34 @@ export function deleteSession(id) {
   return next
 }
 
+export function renameSession(id, title) {
+  const next = getSessions().map(s => s.id === id ? { ...s, title } : s)
+  try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(next)) } catch { /* noop */ }
+  return next
+}
+
+export function clearSessions() {
+  try { localStorage.setItem(SESSIONS_KEY, JSON.stringify([])) } catch { /* noop */ }
+  return []
+}
+
+// Light cleanup for a finalized caption line: collapse whitespace, capitalize
+// the first letter, and add a closing period if it has no end punctuation —
+// speech recognition usually returns neither, which makes saved transcripts
+// hard to read. Only ever apply to *finalized* text, never the live interim.
+export function tidyLine(text) {
+  let t = (text || '').trim().replace(/\s+/g, ' ')
+  if (!t) return t
+  t = t.charAt(0).toUpperCase() + t.slice(1)
+  if (!/[.!?…]$/.test(t)) t += '.'
+  return t
+}
+
 // Build a saved-session record from captured lines.
 export function buildSession(lines, lang) {
   const now = new Date()
+  // Tidy each line's text for a clean, readable saved transcript.
+  lines = lines.map(l => ({ ...l, text: tidyLine(l.text) }))
   const n = lines.length
   return {
     id: 's-' + now.getTime(),

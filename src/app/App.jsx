@@ -8,7 +8,7 @@ import { HistorySearch } from './HistorySearch.jsx'
 import { CaptionStage } from './CaptionStage.jsx'
 import { TranscriptDetail } from './TranscriptDetail.jsx'
 import { SettingsSheet } from './SettingsSheet.jsx'
-import { usePersistentState, addSession } from './store.js'
+import { usePersistentState, addSession, renameSession, deleteSession } from './store.js'
 
 // Default caption presentation. (In the design mockup these were live-editable
 // "tweaks"; here they are the app's shipped defaults.)
@@ -34,12 +34,14 @@ export function RinigApp() {
 
   // Caption preferences persist on the device so they're remembered next time.
   const [lang, setLang] = usePersistentState('rinig.lang.v1', 'en')
-  const [prefs, setPrefs] = usePersistentState('rinig.prefs.v1', {
+  const [prefs, setPrefs] = usePersistentState('rinig.prefs.v2', {
     size: DEFAULTS.captionSize,
     translate: DEFAULTS.translation,
     contrast: DEFAULTS.highContrast,
     save: true,
+    engine: 'online', // 'online' (Web Speech) | 'ondevice' (Whisper)
   })
+  const [, forceRefresh] = React.useReducer(x => x + 1, 0)
 
   const settings = { lang, ...prefs }
   const setSettings = (updater) => {
@@ -50,6 +52,7 @@ export function RinigApp() {
       translate: next.translate ?? p.translate,
       contrast: next.contrast ?? p.contrast,
       save: next.save ?? p.save,
+      engine: next.engine ?? p.engine,
     }))
   }
 
@@ -106,10 +109,13 @@ export function RinigApp() {
         {screen === 'detail' && session && (
           <TranscriptDetail session={session}
             onBack={() => setScreen('start')}
-            onShare={(msg) => showToast(msg)} />
+            onShare={(msg) => showToast(msg)}
+            onRename={(title) => { renameSession(session.id, title); setSession(s => ({ ...s, title })); showToast('Renamed') }}
+            onDelete={() => { deleteSession(session.id); forceRefresh(); setScreen('start'); showToast('Transcript deleted') }} />
         )}
 
-        <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} setSettings={setSettings} />
+        <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} setSettings={setSettings}
+          onCleared={() => { forceRefresh(); showToast('Saved transcripts cleared') }} />
         {toast && <Toast tone="success" hosted>{toast}</Toast>}
       </div>
     </div>
