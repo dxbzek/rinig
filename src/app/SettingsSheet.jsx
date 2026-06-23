@@ -33,6 +33,8 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
           trailing={<Switch checked={settings.contrast} onChange={e=>setSettings(s=>({ ...s, contrast:e.target.checked }))} />} />
         <ListRow title="Save transcripts" meta="Keep a copy on this device"
           trailing={<Switch checked={settings.save} onChange={e=>setSettings(s=>({ ...s, save:e.target.checked }))} />} />
+        <ListRow title="Sound & vibration" meta="Feedback when you start, stop and save"
+          trailing={<Switch checked={settings.sound !== false} onChange={e=>setSettings(s=>({ ...s, sound:e.target.checked }))} />} />
 
         <button onClick={clearAll} style={clearBtn}>Clear saved transcripts</button>
       </div>

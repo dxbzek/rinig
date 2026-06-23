@@ -43,6 +43,16 @@ body {
 }
 .rin-tour-card { animation: rin-fade 200ms var(--ease-out, ease-out); }
 
+/* Screen fade-in, breathing listening glow, and a little save pop. */
+@keyframes rin-screen-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rin-screen { animation: rin-screen-in 220ms var(--ease-out, ease-out); }
+
+@keyframes rin-breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.rin-breathe { animation: rin-breathe 2.6s ease-in-out infinite; }
+
+@keyframes rin-pop { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+.rin-pop { animation: rin-pop 320ms var(--ease-out, ease-out); }
+
 @media (prefers-reduced-motion: reduce) {
-  .rin-tour-card { animation: none; }
+  .rin-tour-card, .rin-screen, .rin-breathe, .rin-pop { animation: none; }
 }

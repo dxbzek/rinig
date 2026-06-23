@@ -39,6 +39,7 @@ export function RinigApp() {
     translate: DEFAULTS.translation,
     contrast: DEFAULTS.highContrast,
     save: true,
+    sound: true,
   })
   const [, forceRefresh] = React.useReducer(x => x + 1, 0)
 
@@ -51,6 +52,7 @@ export function RinigApp() {
       translate: next.translate ?? p.translate,
       contrast: next.contrast ?? p.contrast,
       save: next.save ?? p.save,
+      sound: next.sound ?? p.sound,
     }))
   }
 

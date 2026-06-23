@@ -20,7 +20,7 @@ export function StartScreen({ settings, setSettings, onStart, onOpenSettings, on
   )
 
   return (
-    <div style={{ position:'absolute', inset:0, background:'var(--surface-page)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
+    <div className="rin-screen" style={{ position:'absolute', inset:0, background:'var(--surface-page)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
       <div style={{ paddingTop:'14px' }}>
         <AppBar leading={Logo}
           trailing={<div style={{ display:'flex', gap:'6px' }}>
