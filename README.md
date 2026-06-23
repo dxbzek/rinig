@@ -55,18 +55,25 @@ device frame:
 
 ## Live transcription
 
-In **Chrome or Edge**, the live caption stage uses real speech recognition via
-the browser's [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API)
-— tap the mic, allow microphone access, and your speech is transcribed in
-English (`en-US`) or Tagalog/Filipino (`fil-PH`) per the language toggle.
+Two engines, switchable in **Settings → Captioning engine**:
 
-In other browsers (e.g. Firefox) the stage falls back to a **scripted demo**
-(`src/app/captions-data.js`) that streams canned lines to show the UI.
+- **Online (default)** — the browser's
+  [Web Speech API](https://developer.mozilla.org/docs/Web/API/Web_Speech_API).
+  Fast and zero-download, but needs a connection and (in Chrome) streams audio
+  to Google's servers. Works in Chrome/Edge.
+- **On-device** — OpenAI **Whisper** running locally in the browser via
+  [Transformers.js](https://huggingface.co/docs/transformers.js) (WebGPU where
+  available, otherwise WASM). **Private and offline** — no audio leaves the
+  device. Downloads the model once on first use, then caches it. Higher latency
+  than the online engine; the heavy model code is lazy-loaded only when this
+  engine is selected.
 
-> ⚠️ **Privacy note:** Chrome's Web Speech API streams microphone audio to
-> Google's servers for transcription — it is **not** on-device, despite the
-> onboarding copy. It's ideal for testing accuracy now; a private/offline build
-> would later swap in an on-device model (e.g. Whisper or Vosk).
+Language follows the toggle: English (`en-US` / `english`) or Tagalog/Filipino
+(`fil-PH` / `tagalog`). Where neither engine is available the stage falls back
+to a **scripted demo** (`src/app/captions-data.js`).
+
+> The on-device engine is new and benefits from real-device testing — accuracy
+> and latency depend on the phone and whether WebGPU is available.
 
 ## Project layout
 
