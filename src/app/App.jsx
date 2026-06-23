@@ -40,6 +40,7 @@ export function RinigApp() {
     contrast: DEFAULTS.highContrast,
     save: true,
     engine: 'online', // 'online' (Web Speech) | 'ondevice' (Whisper)
+    quality: 'standard', // on-device model: 'standard' (base) | 'high' (small)
   })
   const [, forceRefresh] = React.useReducer(x => x + 1, 0)
 
@@ -53,6 +54,7 @@ export function RinigApp() {
       contrast: next.contrast ?? p.contrast,
       save: next.save ?? p.save,
       engine: next.engine ?? p.engine,
+      quality: next.quality ?? p.quality,
     }))
   }
 
@@ -76,7 +78,7 @@ export function RinigApp() {
   }
 
   return (
-    <div className="rinig-shell" data-dark={screen === 'live'}>
+    <div className="rinig-shell">
       <div style={{ position:'relative', width:'100%', height:'100%' }}>
         {screen === 'onboard' && <Onboarding onDone={finishOnboarding} accent={vis.accent} />}
 

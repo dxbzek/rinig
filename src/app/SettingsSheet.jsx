@@ -42,6 +42,20 @@ export function SettingsSheet({ open, onClose, settings, setSettings, onCleared 
           </p>
         </div>
 
+        {/* On-device accuracy / model size */}
+        {onDevice && (
+          <div style={{ padding:'4px 8px 10px' }}>
+            <p style={ssLabel}>Accuracy</p>
+            <div style={{ display:'flex', gap:'8px' }}>
+              <EngineChip on={settings.quality !== 'high'} label="Standard" sub="Faster" onClick={()=>setSettings(s=>({ ...s, quality:'standard' }))} />
+              <EngineChip on={settings.quality === 'high'} label="Higher" sub="Slower · bigger download" onClick={()=>setSettings(s=>({ ...s, quality:'high' }))} />
+            </div>
+            <p style={{ margin:'10px 2px 0', fontSize:'var(--text-body-sm)', color:'var(--text-muted)', lineHeight:1.4 }}>
+              Higher accuracy uses a larger model — better for Tagalog and tricky audio, but it downloads more and runs slower.
+            </p>
+          </div>
+        )}
+
         <ListRow title="Show translation line" meta="Display the second language below"
           trailing={<Switch checked={settings.translate} onChange={e=>setSettings(s=>({ ...s, translate:e.target.checked }))} />} />
         <ListRow title="High-contrast captions" meta="Maximum legibility on the stage"
