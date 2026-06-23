@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom/client'
 import './ds/index.js'
 import './app/app.css'
 import { RinigApp } from './app/App.jsx'
+import { ErrorBoundary } from './app/ErrorBoundary.jsx'
 
 // Ask the browser to keep our storage (so the downloaded offline-captions model
 // isn't evicted and re-downloaded every visit). No-op where unsupported.
@@ -18,6 +19,8 @@ if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.p
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RinigApp />
+    <ErrorBoundary>
+      <RinigApp />
+    </ErrorBoundary>
   </React.StrictMode>,
 )

@@ -20,10 +20,11 @@ export function CaptionStage({ settings, setSettings, vis, mode, onExit, onOpenS
   const I = Icon
   const holdMode = mode === 'hold'
 
-  // Two engines: real-time online (fast, default) and on-device Whisper, always
-  // at higher accuracy (private/offline, but not real-time). Both inert until start().
+  // Two engines: real-time online (fast, default) and on-device Whisper
+  // (private/offline). Use the lighter 'standard' model on-device — the larger
+  // one exhausts phone-browser memory and crashes the tab. Both inert until start().
   const online = useSpeechRecognition(settings.lang)
-  const ondevice = useOnDeviceRecognition(settings.lang, 'high')
+  const ondevice = useOnDeviceRecognition(settings.lang, 'standard')
   const onDeviceMode = settings.engine === 'ondevice'
   const eng = onDeviceMode ? ondevice : online
   const supported = eng.supported
