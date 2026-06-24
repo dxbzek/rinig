@@ -1,7 +1,11 @@
 {
+  "id": "/rinig/",
   "name": "Rinig — for Daddy Billy",
   "short_name": "Rinig",
   "description": "Real-time English and Tagalog captions — made with love so Daddy Billy never misses a word.",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["accessibility", "productivity", "utilities"],
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,6 +13,9 @@
   "background_color": "#fbf8f2",
   "theme_color": "#fbf8f2",
   "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "assets/rinig-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "assets/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
