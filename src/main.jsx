@@ -8,6 +8,10 @@ import './ds/index.js'
 import './app/app.css'
 import { RinigApp } from './app/App.jsx'
 import { ErrorBoundary } from './app/ErrorBoundary.jsx'
+import { startAutoUpdate } from './app/autoUpdate.js'
+
+// Keep the app on the newest deployed build (defeats stale browser/CDN cache).
+startAutoUpdate()
 
 // Ask the browser to keep our storage (so the downloaded offline-captions model
 // isn't evicted and re-downloaded every visit). No-op where unsupported.
