@@ -1,7 +1,11 @@
 {
+  "id": "/rinig/",
   "name": "Rinig — for Daddy Billy",
   "short_name": "Rinig",
   "description": "Real-time English and Tagalog captions — made with love so Daddy Billy never misses a word.",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["accessibility", "productivity", "utilities"],
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
